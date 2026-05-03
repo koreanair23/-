@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'jun090990927@gmail.com'
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Product Validation
+    function isValidProduct(data) {
+      return data.keys().hasAll(['name', 'imageUrl', 'category', 'createdAt']) &&
+             data.keys().size() >= 4 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 200 &&
+             data.imageUrl is string && data.imageUrl.size() >= 1 && data.imageUrl.size() <= 1048576 && // Allow large base64 for now
+             data.category in ['sale', 'rental', 'premium'] &&
+             data.createdAt is timestamp &&
+             (!('description' in data) || data.description is string) &&
+             (!('additionalImages' in data) || data.additionalImages is list);
+    }
+
+    match /products/{productId} {
+      allow read: if true; // Public catalog
+      
+      allow create: if isAdmin() && 
+                      isValidId(productId) && 
+                      isValidProduct(incoming()) && 
+                      incoming().createdAt == request.time;
+      
+      allow update: if isAdmin() && 
+                      isValidId(productId) && 
+                      isValidProduct(incoming()) &&
+                      incoming().createdAt == existing().createdAt; // Immutable createdAt
+      
+      allow delete: if isAdmin();
+    }
+
+    // Admins collection - only readable by current user if they are an admin
+    match /admins/{adminId} {
+      allow read: if isSignedIn() && request.auth.uid == adminId;
+      allow write: if false; // Only manageable through GCP console or admin scripts
+    }
+  }
+}
