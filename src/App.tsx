@@ -562,10 +562,17 @@ export default function App() {
                     <div>
                       <h4 className="font-black text-[#000F1D] text-lg mb-2 italic">운영 시간</h4>
                       <div className="text-slate-900 font-bold leading-relaxed text-sm">
-                        <div className="flex justify-between gap-4 border-b border-slate-100 pb-1"><span>월, 화, 수, 금</span> <span>10:00 - 19:00</span></div>
-                        <div className="flex justify-between gap-4 border-b border-slate-100 py-1"><span>목요일</span> <span>10:00 - 17:00</span></div>
+                        <div className="flex justify-between gap-4 border-b border-slate-100 pb-1"><span>월 ~ 금</span> <span>10:00 - 18:00</span></div>
                         <div className="flex justify-between gap-4 border-b border-slate-100 py-1"><span>토요일</span> <span>10:00 - 14:00</span></div>
                         <div className="flex justify-between gap-4 pt-1 text-red-600"><span>일요일</span> <span>정기휴무</span></div>
+                        
+                        <div className="mt-5 p-4 bg-[#C29B2C]/5 border border-[#C29B2C]/20 rounded-2xl text-center">
+                          <p className="text-[#C29B2C] font-black text-[14px] leading-relaxed">
+                            오시기 전에<br />
+                            연락주시면<br />
+                            감사하겠습니다.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
