@@ -86,10 +86,14 @@ export default function App() {
 
   const handleGoogleLogin = async () => {
     try {
-      await signInWithGoogle();
+      const loggedInUser = await signInWithGoogle();
+      if (loggedInUser && loggedInUser.email !== ADMIN_EMAIL) {
+        alert(`인증 성공: ${loggedInUser.email}\n관리자 계정(${ADMIN_EMAIL})이 아니므로 관리 기능은 제한됩니다.`);
+      }
       setShowLogin(false);
-    } catch (error) {
-      alert('로그인에 실패했습니다.');
+    } catch (error: any) {
+      console.error("Login Error:", error);
+      alert('로그인 중 오류가 발생했습니다: ' + (error.message || '알 수 없는 오류'));
     }
   };
 
@@ -633,7 +637,9 @@ export default function App() {
                   </button>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    <p className="text-xs text-[#D4AF37] font-bold">관리자로 로그인됨</p>
+                    <p className="text-xs text-[#D4AF37] font-bold">
+                      {isAdmin ? '관리자로 로그인됨' : `${user.email} (권한 없음)`}
+                    </p>
                     <button 
                       onClick={handleLogout}
                       className="text-[12px] bg-white/5 border border-white/10 px-5 py-2.5 rounded-full text-red-400 hover:bg-red-500/10 transition-all uppercase tracking-widest font-black flex items-center gap-2"
